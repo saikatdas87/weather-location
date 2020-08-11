@@ -15,7 +15,7 @@ import org.springframework.web.util.UriTemplate;
 import java.net.URI;
 
 @Service
-public class ExternalServiceRepoImpl<T> implements ExternalServiceRepo<T> {
+public class ExternalServiceRepoImpl implements ExternalServiceRepo {
 
     Logger logger = LoggerFactory.getLogger(ExternalServiceRepoImpl.class);
 
@@ -35,7 +35,7 @@ public class ExternalServiceRepoImpl<T> implements ExternalServiceRepo<T> {
      * @return T
      * @throws RestClientException
      */
-    public T fetchFromExternalService(Class<T> responseType, String uri, Object... uriParams) throws RestClientException {
+    public <T> T fetchFromExternalService(Class<T> responseType, String uri, Object... uriParams) throws RestClientException {
         URI exchangeUrl = new UriTemplate(uri).expand(uriParams);
         RequestEntity<String> request = new RequestEntity<>(HttpMethod.GET, exchangeUrl);
         RestTemplate template = restTemplateBuilder.build();
