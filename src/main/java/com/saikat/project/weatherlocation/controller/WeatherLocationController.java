@@ -2,6 +2,8 @@ package com.saikat.project.weatherlocation.controller;
 
 import com.saikat.project.weatherlocation.exception.InvalidDataException;
 import com.saikat.project.weatherlocation.exception.NoPropertiesDefinedException;
+import com.saikat.project.weatherlocation.exception.ResourceNotFoundException;
+import com.saikat.project.weatherlocation.model.LocationWeatherInfo;
 import com.saikat.project.weatherlocation.model.external.GeoCodeResponse;
 import com.saikat.project.weatherlocation.model.external.TempParam;
 import com.saikat.project.weatherlocation.service.GeocodeFetcherService;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 public class WeatherLocationController {
@@ -31,20 +34,27 @@ public class WeatherLocationController {
     }
 
     @GetMapping(value = {"/api/weather-location-info/", "/api/weather-location-info/{city}"})
-    public String getWeatherAndLocationInfo(@PathVariable Optional<String> city)
+    public LocationWeatherInfo getWeatherAndLocationInfo(@PathVariable Optional<String> city)
             throws NoPropertiesDefinedException, InvalidDataException {
         final String cityName = city.orElse("");
         validator.validateCity(cityName);
 
+        List<Optional<GeoCodeResponse>> maybeGeoCodes = geoCodeService.fetchGeocodesForCity(cityName);
+        List<GeoCodeResponse> geoCodes = maybeGeoCodes.stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        if (geoCodes.isEmpty()) {
+            throw new ResourceNotFoundException("Location details could not be found for : " + cityName);
+        }
 
+        TempParam weather = weatherInfoFetcherService.fetchCityWeather(cityName);
+        return buildResponseInfo(geoCodes, weather);
+    }
 
-        List<Optional<GeoCodeResponse>> res = geoCodeService.fetchGeocodesForCity(cityName);
-        res.forEach( r -> r.ifPresent(x -> System.out.println(x.getLatitude())));
-
-
-        TempParam p = weatherInfoFetcherService.fetchCityWeather(cityName);
-        System.out.println(" Temp : " + p.getTemp());
-        return "0 " + city;
+    private LocationWeatherInfo buildResponseInfo(List<GeoCodeResponse> geoCodes, TempParam weather) {
+        return LocationWeatherInfo.buildLocationWeatherInfo(geoCodes, weather)
+                .orElseThrow(() -> new InvalidDataException("Could not fetch details"));
     }
 
 }

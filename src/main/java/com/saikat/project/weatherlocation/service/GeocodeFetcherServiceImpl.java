@@ -41,7 +41,7 @@ public class GeocodeFetcherServiceImpl implements GeocodeFetcherService {
      * The method which calls all the configured geo code providers to fetch geo codes and returns them as list
      *
      * @param cityName
-     * @return List<Optional<GeoCodeResponse>>
+     * @return List<Optional < GeoCodeResponse>>
      */
     @Override
     public List<Optional<GeoCodeResponse>> fetchGeocodesForCity(String cityName) {
@@ -84,13 +84,19 @@ public class GeocodeFetcherServiceImpl implements GeocodeFetcherService {
                     // In case any exception occurs log and ignore the exception
                     // If all api fails then we throw exception from controller
                     try {
-                        logger.info("Calling service for provider : " + provider);
-                        return Optional.ofNullable(processExternalResponse(resType, api, city));
+                        logger.debug("Calling service for provider : " + provider);
+                        GeoCodeResponse geoCodeResponse = processExternalResponse(resType, api, city);
+                        if (null == geoCodeResponse ||
+                                null == geoCodeResponse.getLongitude() ||
+                                null == geoCodeResponse.getLatitude()) {
+                            return Optional.empty();
+                        }
+                        return Optional.of(geoCodeResponse);
                     } catch (RestClientException re) {
-                        logger.error("Exception Calling rest service ", re);
+                        logger.error("Exception Calling rest service for location : " + city, re);
                         return Optional.empty();
                     } catch (Exception e) {
-                        logger.error("Exception occurred while fetching geocode ", e);
+                        logger.error("Exception occurred while fetching geocode for location : " + city, e);
                         return Optional.empty();
                     }
                 });
