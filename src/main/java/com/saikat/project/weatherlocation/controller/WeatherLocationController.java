@@ -33,6 +33,14 @@ public class WeatherLocationController {
         this.geoCodeService = geoCodeService;
     }
 
+    /**
+     * The API GET method for fetching location and weather info for a city
+     *
+     * @param city city name for which we find infos (passed as path variable)
+     * @return LocationWeatherInfo an object containing weather and location info
+     * @throws NoPropertiesDefinedException
+     * @throws InvalidDataException
+     */
     @GetMapping(value = {"/api/weather-location-info/", "/api/weather-location-info/{city}"})
     public LocationWeatherInfo getWeatherAndLocationInfo(@PathVariable Optional<String> city)
             throws NoPropertiesDefinedException, InvalidDataException {
@@ -52,6 +60,13 @@ public class WeatherLocationController {
         return buildResponseInfo(geoCodes, weather);
     }
 
+    /**
+     * Build the response data with geo code info and weather info
+     *
+     * @param geoCodes
+     * @param weather
+     * @return LocationWeatherInfo
+     */
     private LocationWeatherInfo buildResponseInfo(List<GeoCodeResponse> geoCodes, TempParam weather) {
         return LocationWeatherInfo.buildLocationWeatherInfo(geoCodes, weather)
                 .orElseThrow(() -> new InvalidDataException("Could not fetch details"));
