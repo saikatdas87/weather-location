@@ -6,7 +6,7 @@ import com.saikat.project.weatherlocation.exception.ResourceNotFoundException;
 import com.saikat.project.weatherlocation.model.LocationWeatherInfo;
 import com.saikat.project.weatherlocation.model.external.GeoCodeResponse;
 import com.saikat.project.weatherlocation.model.external.TempParam;
-import com.saikat.project.weatherlocation.service.GeocodeFetcherService;
+import com.saikat.project.weatherlocation.service.GeoCodeFetcherService;
 import com.saikat.project.weatherlocation.service.WeatherInfoFetcherService;
 import com.saikat.project.weatherlocation.validation.CityNameValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +22,12 @@ import java.util.stream.Collectors;
 public class WeatherLocationController {
     private final WeatherInfoFetcherService weatherInfoFetcherService;
     private final CityNameValidator validator;
-    private final GeocodeFetcherService geoCodeService;
+    private final GeoCodeFetcherService geoCodeService;
 
     @Autowired
     public WeatherLocationController(WeatherInfoFetcherService weatherInfoFetcherService,
                                      CityNameValidator validator,
-                                     GeocodeFetcherService geoCodeService) {
+                                     GeoCodeFetcherService geoCodeService) {
         this.weatherInfoFetcherService = weatherInfoFetcherService;
         this.validator = validator;
         this.geoCodeService = geoCodeService;

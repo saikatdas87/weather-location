@@ -1,5 +1,6 @@
 package com.saikat.project.weatherlocation.service;
 
+import com.saikat.project.weatherlocation.exception.NoPropertiesDefinedException;
 import com.saikat.project.weatherlocation.model.external.GeoCodeResponse;
 import com.saikat.project.weatherlocation.model.external.LocationResponse;
 import com.saikat.project.weatherlocation.properties.ApplicationProperties;
@@ -18,9 +19,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class GeocodeFetcherServiceImpl implements GeocodeFetcherService {
+public class GeoCodeFetcherServiceImpl implements GeoCodeFetcherService {
 
-    Logger logger = LoggerFactory.getLogger(GeocodeFetcherServiceImpl.class);
+    Logger logger = LoggerFactory.getLogger(GeoCodeFetcherServiceImpl.class);
 
     private final ExternalServiceRepo externalServiceRepo;
     private final ApplicationProperties properties;
@@ -28,7 +29,7 @@ public class GeocodeFetcherServiceImpl implements GeocodeFetcherService {
     private final String GEOCODE_PROVIDER_API_KEY_PREFIX = "geocode.api.";
 
     @Autowired
-    public GeocodeFetcherServiceImpl(ExternalServiceRepo externalServiceRepo,
+    public GeoCodeFetcherServiceImpl(ExternalServiceRepo externalServiceRepo,
                                      ApplicationProperties properties,
                                      Environment env) {
         this.externalServiceRepo = externalServiceRepo;
@@ -44,9 +45,13 @@ public class GeocodeFetcherServiceImpl implements GeocodeFetcherService {
      * @return List<Optional < GeoCodeResponse>>
      */
     @Override
-    public List<Optional<GeoCodeResponse>> fetchGeocodesForCity(String cityName) {
+    public List<Optional<GeoCodeResponse>> fetchGeocodesForCity(String cityName) throws NoPropertiesDefinedException {
 
         List<String> geoCodeProviderList = geoCodeProviders();
+        if (geoCodeProviderList.isEmpty() || geoCodeProviderList.stream().allMatch(provider -> provider.trim().equals(""))) {
+            throw new NoPropertiesDefinedException("No location geo code providers configured in config file");
+        }
+
         // For all the configured geo code providers fetch the location details and only take
         // latitude, longitude values.
         return geoCodeProviderList.stream().parallel().map(provider -> {
@@ -72,10 +77,10 @@ public class GeocodeFetcherServiceImpl implements GeocodeFetcherService {
      * Method to see if API URI is configured in properties and call the API to get the location details. Catch exception in case
      * any and supress it as we seek at least one successful response.
      *
-     * @param city
-     * @param api
-     * @param provider
-     * @return Optional<GeoCodeResponse>
+     * @param city     City for which we fetch latitude and longitude
+     * @param api      External REST API address to be called
+     * @param provider The external service provider name
+     * @return Optional<GeoCodeResponse> - An Option of GeoCodeResponse
      */
     private Optional<GeoCodeResponse> fetchLocationResponse(final String city, final String api, final String provider) {
         // Call external service of a provider if configured
@@ -105,10 +110,10 @@ public class GeocodeFetcherServiceImpl implements GeocodeFetcherService {
     /**
      * A method to call external repo and based on the response type (array or not) set the response
      *
-     * @param response
-     * @param api
-     * @param city
-     * @return GeoCodeResponse
+     * @param response A object containing POJO where external REST response in mapped
+     * @param api      URI of the external service
+     * @param city     cityName for which we would be fetching location information
+     * @return GeoCodeResponse Response object containing latitude and longitude
      */
     private GeoCodeResponse processExternalResponse(LocationResponse response, String api, String city) {
         if (response.isArray()) {

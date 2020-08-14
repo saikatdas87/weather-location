@@ -22,7 +22,7 @@ public class ExternalServiceRepoImpl implements ExternalServiceRepo {
     private final RestTemplateBuilder restTemplateBuilder;
 
     @Autowired
-    ExternalServiceRepoImpl(RestTemplateBuilder restTemplateBuilder) {
+    public ExternalServiceRepoImpl(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplateBuilder = restTemplateBuilder;
     }
 
