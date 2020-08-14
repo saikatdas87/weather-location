@@ -27,12 +27,12 @@ public class ExternalServiceRepoImpl implements ExternalServiceRepo {
     }
 
     /**
-     * The method to call any external API and store the required response data in corresponding POJO and then return it
+     * The method to call any external API (GET) and store the required response data in corresponding POJO and then return it
      *
-     * @param responseType
-     * @param uri
-     * @param uriParams
-     * @return T
+     * @param responseType response POJO
+     * @param uri          external service uri
+     * @param uriParams    the params for the URI
+     * @return T the POJO passed as @param - responseType
      * @throws RestClientException
      */
     public <T> T fetchFromExternalService(Class<T> responseType, String uri, Object... uriParams) throws RestClientException {

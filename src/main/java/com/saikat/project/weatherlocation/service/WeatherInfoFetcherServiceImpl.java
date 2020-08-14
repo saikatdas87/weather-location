@@ -27,6 +27,14 @@ public class WeatherInfoFetcherServiceImpl implements WeatherInfoFetcherService 
         this.properties = properties;
     }
 
+    /**
+     * The serive method to fetch weather information
+     *
+     * @param cityName Name of the city
+     * @return TempParam
+     * @throws NoPropertiesDefinedException
+     * @throws ResourceNotFoundException
+     */
     @Override
     public TempParam fetchCityWeather(String cityName) throws NoPropertiesDefinedException, ResourceNotFoundException {
         final Optional<String> maybeWeatherApiURI = Optional.ofNullable(properties.getCurrentWeatherApiURL());
