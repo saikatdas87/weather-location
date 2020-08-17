@@ -39,15 +39,20 @@ public class WeatherInfoFetcherServiceImpl implements WeatherInfoFetcherService 
     public TempParam fetchCityWeather(String cityName) throws NoPropertiesDefinedException, ResourceNotFoundException {
         final Optional<String> maybeWeatherApiURI = Optional.ofNullable(properties.getCurrentWeatherApiURL());
         return maybeWeatherApiURI.map(uri -> {
-            try {
-                return externalServiceRepo.fetchFromExternalService(TempParam.class, uri, cityName);
-            } catch (RestClientException re) {
-                logger.error("RestClientException fetching weather for city : " + cityName, re);
-                throw new ResourceNotFoundException("Exception fetching weather for city " + cityName + " : " + re.getMessage());
-            } catch (Exception e) {
-                logger.error("Some Exception occurred fetching weather for city : " + cityName, e);
-                throw new ResourceNotFoundException("Something wrong fetching weather for city " + cityName + " : " + e.getMessage());
+            if (uri.trim().equals("")) {
+                throw new ResourceNotFoundException("No uri defined for weather fetching service in configuration");
+            }else {
+                try {
+                    return externalServiceRepo.fetchFromExternalService(TempParam.class, uri, cityName);
+                } catch (RestClientException re) {
+                    logger.error("RestClientException fetching weather for city : " + cityName, re);
+                    throw new ResourceNotFoundException("Exception fetching weather for city " + cityName + " : " + re.getMessage());
+                } catch (Exception e) {
+                    logger.error("Some Exception occurred fetching weather for city : " + cityName, e);
+                    throw new ResourceNotFoundException("Something wrong fetching weather for city " + cityName + " : " + e.getMessage());
+                }
             }
+
         }).orElseThrow(() -> new NoPropertiesDefinedException("No uri defined for weather fetching service in configuration"));
     }
 
